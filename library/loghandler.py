@@ -48,9 +48,11 @@ class loghandler(object):
         self._logger.debug(msg)
 
     def info(self,msg):
+        print('info',msg)
         self._logger.info(msg)
 
     def critical(self,msg):
+        print('critical',msg)
         self._logger.critical(msg)
 
 class app(object):

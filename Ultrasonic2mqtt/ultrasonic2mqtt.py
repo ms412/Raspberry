@@ -67,5 +67,5 @@ class manager(object):
 
 
 if __name__ == '__main__':
-    mgr = manager('/home/pi/m2m/ultrasonic.cfg')
+    mgr = manager('/home/pi/m2m/ultrasonic2mqtt.cfg')
     mgr.run()

@@ -89,36 +89,4 @@ class raspberry(object):
             self._gpio.add_event_detect(ioPin, self._gpio.BOTH, callback=callback, bouncetime=debounce)
         return True
 
-class dummy(Thread):
 
-    def __init__(self,logChannel):
-        Thread.__init__(self)
-
-        self._log = logChannel
-        self._callback = None
-
-    def Reset(self):
-        return True
-
-    def ConfigIO(self,ioPin,iodir,pullup=None):
-        return True
-
-    def WritePin(self,ioPin,value):
-        return True
-
-    def ReadPin(self,ioPin):
-        value = random.choice([True, False])
-        return value
-
-    def Edge(self,ioPin,callback,trigger,debounce=100):
-        self._pin = ioPin
-        self._callback = callback
-        self.start()
-        return True
-
-
-    def run(self):
-        while self._threadRun:
-            time.sleep(5)
-            value = random.choice([True, False])
-            self._callback(self._pin)
