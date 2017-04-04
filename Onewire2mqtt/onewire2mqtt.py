@@ -97,12 +97,11 @@ class manager(object):
         self.startSystem()
         self.readconfig()
         self.logger()
-        self._log.info('Start Reading Valuse')
+
+        self._log.info('Startup, %s %s %s' % (__app__, __VERSION__, __DATE__))
 
         data = self.getData()
-       # print('DAten',data)
         self._log.info(data)
-
         self.publishData(data)
 
 

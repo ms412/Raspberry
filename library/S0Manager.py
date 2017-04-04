@@ -34,11 +34,6 @@ class S0manager(Thread):
         self._hwHandle = None
         self._devHandle = {}
 
-     #   self._counter = 0
-      #  self._power = 0
-      #  self._energy = 0
-       # self._result = {}
-
         self.msg = {}
 
         self.setup()

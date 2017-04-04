@@ -30,10 +30,6 @@ from configobj import ConfigObj
 from library.mqttpush import mqttpush
 from library.loghandler import loghandler
 from library.S0Manager import S0manager
-#from library.msgbus import msgbus
-#from library.msgAdapter import msgAdapter
-
-#from library.hwIf_raspberry import raspberry
 
 class manager(object):
 
@@ -79,13 +75,6 @@ class manager(object):
 
         return True
 
-   # def start_mqttbroker(self):
-    #    self._mqttbroker = mqttpush(self._cfg_broker)
-     #   self.msgbus_subscribe('MQTT_SNK',self._mqttbroker.push)
-       # self._mqttbroker = mqttbroker(self._cfg_broker,'MQTT_SNK','MQTT_SRC','LOG')
-       # self._mqttbroker.start()
-      #  return True
-
     def start_gpio(self):
       #  self.msgbus_subscribe
         self._S0mgr = S0manager(self._cfg_gpio,self.msgAdapter,self._log)
@@ -119,29 +108,17 @@ class manager(object):
         self.start_logger()
         time.sleep(2)
 
-     #   log_msg = 'Startup S02mqtt Adapter'
-      #  self.msgbus_publish('LOG','%s %s: %s %s %s %s' % ('INFO', self.whoami(), log_msg, __app__, __VERSION__, __DATE__))
-#        self.start_mqttbroker()
- #       self.start_msgAdapter()$
         self._log.info('Startup, %s %s %s'% ( __app__, __VERSION__, __DATE__) )
         self.start_gpio()
 
         while(True):
             if not self._S0mgr.isAlive():
-            #    log_msg = 'GPIO Thread died'
-             #   self.msgbus_publish('LOG', '%s %s: %s' % ('CRITICAL', self.whoami(), log_msg))
-                self._log.critical('S0mgr died... restrart')
+                self._log.critical('%s died... restrart'%(__app__))
                 self._S0mgr.__del__()
                 self.start_gpio()
 
             else:
                 time.sleep(10)
-
-      #  self.start_socketcan()
-       # self.start_adapter()
-
-
-
 
 if __name__ == "__main__":
 
@@ -153,6 +130,6 @@ if __name__ == "__main__":
         configfile = 'C:/Users/tgdscm41/PycharmProjects/Raspberry/S02mqtt.cfg'
         #configfile =  '/home/pi/m2m/S02mqtt.cfg'
 
-    print('Configfile',configfile)
+  #  print('Configfile',configfile)
     mgr_handle = manager(configfile)
     mgr_handle.run()

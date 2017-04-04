@@ -90,13 +90,9 @@ class manager(object):
 #        self.startSystem()
         self.readconfig()
         self.logger()
-        self._log.info('Start Reading Valuse')
+
+        self._log.info('Startup, %s %s %s'% ( __app__, __VERSION__, __DATE__) )
         data = self.modbus()
-
-   #     data = self.getData()
-       # print('DAten',data)
-      #  self._log.info(data)
-
         self.publishData(data)
 
 
@@ -106,12 +102,8 @@ if __name__ == '__main__':
     if len(sys.argv) == 2:
         configfile = sys.argv[1]
     else:
-        #    configfile = 'C:/Users/tgdscm41/PycharmProjects/Raspberry/S02mqtt1.cfg'
-       # configfile = 'C:/Users/tgdscm41/PycharmProjects/Raspberry/Modbus2mqtt/modbus2mqtt.cfg'
         configfile ='/opt/Modbus2mqtt/modbus2mqtt.cfg'
-        # configfile =  '/home/pi/m2m/S02mqtt.cfg'
 
-        # print('Configfile',configfile)
     mgr_handle = manager(configfile)
     mgr_handle.run()
 

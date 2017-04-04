@@ -20,6 +20,7 @@ __author__ = "Markus Schiesser"
 __contact__ = "M.Schiesser@gmail.com"
 __copyright__ = "Copyright (C) 2017 Markus Schiesser"
 __license__ = 'GPL v3'
+
 from configobj import ConfigObj
 from library.sr04 import sr04
 from library.configfile import configfile
@@ -78,7 +79,8 @@ class manager(object):
     def run(self):
         self.readconfig()
         self.logger()
-        self._log.info('Start Reading Valuse')
+        self._log.info('Startup, %s %s %s' % (__app__, __VERSION__, __DATE__))
+      #  self._log.info('Start Reading Valuse')
         data = self.measure()
         print('DAten',data)
         self._log.info(data)
