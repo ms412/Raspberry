@@ -153,6 +153,6 @@ if __name__ == "__main__":
         configfile = 'C:/Users/tgdscm41/PycharmProjects/Raspberry/S02mqtt.cfg'
         #configfile =  '/home/pi/m2m/S02mqtt.cfg'
 
-   # print('Configfile',configfile)
+    print('Configfile',configfile)
     mgr_handle = manager(configfile)
     mgr_handle.run()

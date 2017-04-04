@@ -12,7 +12,7 @@ import time
 import device interface drivers
 '''
 
-#from library.hwIf_raspberry import raspberry
+from library.hwIf_raspberry import raspberry
 from library.hwIf_dummy import dummy
 from library.tempfile import tempfile
 
