@@ -77,13 +77,14 @@ class manager(object):
 
     def start_gpio(self):
       #  self.msgbus_subscribe
+        self._log('Start GPIO Interface with configuration: s%'% self._cfg_gpio)
         self._S0mgr = S0manager(self._cfg_gpio,self.msgAdapter,self._log)
      #   self._gpio = gpio(self._cfg_gpio,'GPIO_SNK','GPIO_SRC','LOG')
         self._S0mgr.start()
         return True
 
     def msgAdapter(self,msg):
-        print('msg',msg)
+        #print('msg',msg)
         for deviceId, data in msg.items():
             self.publishData(deviceId,json.dumps(data))
 
@@ -96,6 +97,7 @@ class manager(object):
        # for deviceId, measurement in data.items():
         channel = main_channel + '/' + deviceId
           #  print('channel',channel,deviceId)
+        self._log.debug('Push to mqtt server %s: %s'%(channel,deviceId))
         mqttc.publish(channel,data)
 
         return True

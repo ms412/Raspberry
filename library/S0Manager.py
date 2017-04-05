@@ -68,7 +68,7 @@ class S0manager(Thread):
             if isinstance(_cfg, dict):
                 if tmpdata != None:
                     _tmp = tmpdata.get(_pin,None)
-                    print('Temp',_tmp,_pin,tmpdata.get('ENERGY',0))
+                   # print('Temp',_tmp,_pin,tmpdata.get('ENERGY',0))
                     if None == _tmp:
                         _cfg['TIME_SUMME'] = 0
                         _cfg['TIME_DELTA'] = 0
@@ -81,7 +81,8 @@ class S0manager(Thread):
 
                 #self._devHandle[_pin] = S0(self._hwHandle, _pin, _cfg, self._log)
                 self._devHandle[_pin] = S0(self._hwHandle, _cfg, self._log)
-                print('devHandle',self._devHandle)
+              #  print('devHandle',self._devHandle)
+        return True
 
     def run(self):
 
@@ -106,6 +107,8 @@ class S0manager(Thread):
                 self._log.debug('Send Update %s'% self.msg)
 
                 _timeout = time.time() + self._update
+
+        return True
 
 class S0(object):
 
@@ -141,8 +144,6 @@ class S0(object):
 
         self.setup()
 
-
-
     def setup(self):
 
       #  self._powerData.append(self._power)
@@ -151,7 +152,7 @@ class S0(object):
 
 
 
-        self._accuracySec = 3600 * 1000 / self._factor / self._accuracyWatt
+   #     self._accuracySec = 3600 * 1000 / self._factor / self._accuracyWatt
 
         if not self._pin == None:
             self._hwHandle.ConfigIO(self._pin,'IN',self._attenuator)
@@ -160,7 +161,8 @@ class S0(object):
         return True
 
     def callback(self,pin):
-        print('callback',pin)
+     #   print('callback',pin)
+        self._log('Callback from Pin: %s'% pin)
 
         if self._pulsCounter > 0:
 
@@ -171,13 +173,15 @@ class S0(object):
             #self._powerData.append(self.power(self._t_update,_timeCurrent))
             self._Tdelta = _timeCurrent - self._T0
             self._timeCounter = self._timeCounter + self._Tdelta
-            print('Conter',self._timeCounter,self._Tdelta,self._pulsCounter)
+           # print('Conter',self._timeCounter,self._Tdelta,self._pulsCounter)
+            self._log('Pin: %s, Time Counter: %s, Time Delta: %s, Puls Counter: %s' % (pin,self._timeCounter, self._Tdelta,self._pulsCounter))
 
             #self._t_update = _timeCurrent
             self._T0 = _timeCurrent
 
         else:
-            print('First Puls now Start')
+        #    print('First Puls now Start')
+            self._log('Start Counter Pin: %s'% pin)
 
         self._pulsCounter = self._pulsCounter + 1
 

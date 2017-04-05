@@ -30,7 +30,7 @@ class loghandler(object):
     def handle(self,methode,config):
         print (methode)
         if 'SYSLOG' in methode:
-            print('Ssyslog',config )
+          #  print('Ssyslog',config )
             host = config.get('HOST','localhost')
             handler = logging.handlers.SysLogHandler(address=(host, 514), facility=19)
 
@@ -50,6 +50,14 @@ class loghandler(object):
     def info(self,msg):
         print('info',msg)
         self._logger.info(msg)
+
+    def warning(self,msg):
+        print('critical',msg)
+        self._logger.warning(msg)
+
+    def error(self,msg):
+        print('critical',msg)
+        self._logger.error(msg)
 
     def critical(self,msg):
         print('critical',msg)
