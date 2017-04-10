@@ -29,7 +29,7 @@ class mqttpush(object):
     def publish(self,channel,msg):
         self._mqttc.connect(self._host)
         self._mqttc.publish(channel,msg)
-        print('cc',channel,msg)
+       # print('cc',channel,msg)
         self._mqttc.loop(2)
         self._mqttc.disconnect()
         return True

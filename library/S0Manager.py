@@ -49,11 +49,11 @@ class S0manager(Thread):
         if tmpdata == None:
           #  print('file does not exist')
             log_msg = 'Tempfile does not exist'
-            self._log.info(log_msg)
+            self._log.info('Tempfile does not exist: %s'% self._tmpfilename)
         else:
             #print('Data',tmpdata)
-            log_msg = 'Tempfile exit read old values'
-            self._log.info(log_msg)
+            #log_msg =
+            self._log.info('Tempfile exit read old values')
 
         if 'RASPBERRY' in self._cfg.get('HWIF','RASPBERRY'):
             self._hwHandle = raspberry(self._log)
@@ -162,7 +162,7 @@ class S0(object):
 
     def callback(self,pin):
      #   print('callback',pin)
-        self._log('Callback from Pin: %s'% pin)
+        self._log.debug('Callback from Pin: %s'% pin)
 
         if self._pulsCounter > 0:
 
@@ -174,14 +174,14 @@ class S0(object):
             self._Tdelta = _timeCurrent - self._T0
             self._timeCounter = self._timeCounter + self._Tdelta
            # print('Conter',self._timeCounter,self._Tdelta,self._pulsCounter)
-            self._log('Pin: %s, Time Counter: %s, Time Delta: %s, Puls Counter: %s' % (pin,self._timeCounter, self._Tdelta,self._pulsCounter))
+            self._log.debug('Pin: %s, Time Counter: %s, Time Delta: %s, Puls Counter: %s' % (pin,self._timeCounter, self._Tdelta,self._pulsCounter))
 
             #self._t_update = _timeCurrent
             self._T0 = _timeCurrent
 
         else:
         #    print('First Puls now Start')
-            self._log('Start Counter Pin: %s'% pin)
+            self._log.debug('Start Counter Pin: %s'% pin)
 
         self._pulsCounter = self._pulsCounter + 1
 

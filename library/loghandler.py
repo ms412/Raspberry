@@ -31,7 +31,8 @@ class loghandler(object):
         print (methode)
         if 'SYSLOG' in methode:
           #  print('Ssyslog',config )
-            host = config.get('HOST','localhost')
+            host = config.get('LOGSERVER','localhost')
+           # print('Syslog',host)
             handler = logging.handlers.SysLogHandler(address=(host, 514), facility=19)
 
             hostname = socket.gethostname()
@@ -45,22 +46,23 @@ class loghandler(object):
 
 
     def debug(self,msg):
+    #    print('debug',msg)
         self._logger.debug(msg)
 
     def info(self,msg):
-        print('info',msg)
+     #   print('info',msg)
         self._logger.info(msg)
 
     def warning(self,msg):
-        print('critical',msg)
+      #  print('critical',msg)
         self._logger.warning(msg)
 
     def error(self,msg):
-        print('critical',msg)
+       # print('critical',msg)
         self._logger.error(msg)
 
     def critical(self,msg):
-        print('critical',msg)
+#        print('critical',msg)
         self._logger.critical(msg)
 
 class app(object):

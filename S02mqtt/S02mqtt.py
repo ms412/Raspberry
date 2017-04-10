@@ -77,7 +77,7 @@ class manager(object):
 
     def start_gpio(self):
       #  self.msgbus_subscribe
-        self._log('Start GPIO Interface with configuration: s%'% self._cfg_gpio)
+        self._log.debug('Start GPIO Interface with configuration: %s'% (self._cfg_gpio))
         self._S0mgr = S0manager(self._cfg_gpio,self.msgAdapter,self._log)
      #   self._gpio = gpio(self._cfg_gpio,'GPIO_SNK','GPIO_SRC','LOG')
         self._S0mgr.start()

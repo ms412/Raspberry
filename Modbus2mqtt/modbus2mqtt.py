@@ -67,7 +67,7 @@ class manager(object):
         self._mgr.setup()
         print(self._commands)
         for key,item in self._commands.items():
-            print('data',key, item)
+          #  print('data',key, item)
             value = self._mgr.read(item)
             if value is not None:
                 result[key]= value
@@ -81,7 +81,7 @@ class manager(object):
 
         for deviceId, measurement in data.items():
             channel = main_channel + '/' + deviceId
-            print('channel',channel,measurement)
+            self._log.debug('channel: %s, mesage %s'% (channel,measurement))
             mqttc.publish(channel,measurement)
 
         return True
