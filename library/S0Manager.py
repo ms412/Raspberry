@@ -141,6 +141,7 @@ class S0(object):
 
         self._T0 = 0
         self._Tdelta = 0
+        self._Pdelta = 0
 
         self.setup()
 
@@ -169,12 +170,16 @@ class S0(object):
         #    print('Test',self._t_update,self._powerData)
 
             _timeCurrent = time.time()
+            _T1 = _timeCurrent - self._T0
+            self._Tdelta = self._Tdelta + _T1
+            self._timeCounter = self._timeCounter + _T1
+            self._Pdelta = self._Pdelta + 1
 
             #self._powerData.append(self.power(self._t_update,_timeCurrent))
-            self._Tdelta = _timeCurrent - self._T0
-            self._timeCounter = self._timeCounter + self._Tdelta
+           # self._Tdelta = _timeCurrent - self._T0
+         #   self._timeCounter = self._timeCounter + self._Tdelta
            # print('Conter',self._timeCounter,self._Tdelta,self._pulsCounter)
-            self._log.debug('Pin: %s, Time Counter: %s, Time Delta: %s, Puls Counter: %s' % (pin,self._timeCounter, self._Tdelta,self._pulsCounter))
+            self._log.debug('Pin: %s, Total Time Counter: %s, Time Delta: %s, Total Puls Counter: %s, Puls Delta: %s' % (pin,self._timeCounter, self._Tdelta,self._pulsCounter,self._Pdelta))
 
             #self._t_update = _timeCurrent
             self._T0 = _timeCurrent
@@ -191,6 +196,10 @@ class S0(object):
     def getData(self):
         data = {}
         data['PULS_SUMME'] = self._pulsCounter
+        data['PULS_DELTA'] = self._Pdelta
         data['TIME_SUMME'] = self._timeCounter
         data['TIME_DELTA'] = self._Tdelta
+
+        self._Tdelta = 0
+        self._Pdelta = 0
         return data

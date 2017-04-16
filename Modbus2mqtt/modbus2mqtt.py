@@ -52,7 +52,7 @@ class manager(object):
         self._logcfg = _config.get('LOGGING',None)
         self._mqttbroker = _config.get('BROKER',None)
         self._modbus = _config.get('MODBUS',None)
-        self._commands = _config.get('COMMANDS',None)
+        self._commands = _config.get('DEVICE',None)
         print(self._logcfg)
         return True
 
@@ -62,27 +62,37 @@ class manager(object):
         return True
 
     def modbus(self):
-        result = {}
-        self._mgr = mgr_modbus(self._modbus,self._log)
-        self._mgr.setup()
-        print(self._commands)
-        for key,item in self._commands.items():
-          #  print('data',key, item)
-            value = self._mgr.read(item)
-            if value is not None:
-                result[key]= value
+      #  result = {}
+        for devicename,item in self._commands.items():
+           # print(key,item['CONFIG']['MODBUSID'])
+            print(devicename,item)
+            self._modbus['DEVICEID']=item['CONFIG']['MODBUSID']
+            self._mgr = mgr_modbus(self._modbus,self._log)
+            self._mgr.setup()
+            _channel = item.get('PUBLISH','/OPENAHB/AC')
+            print(item)
+            _result = {}
+            for key,item in item['CALLS'].items():
+                print('data',key, item)
+             #   value =0
+                value = self._mgr.read(item)
+               # value  = 0
+                if value is not None:
+                    _result[key]= value
 
-        print(result)
-        return result
+            print('Result',_result,devicename)
+            self.publishData(devicename,_result)
+       # print(result)
+        return True
 
-    def publishData(self,data):
+    def publishData(self,channel,data):
         mqttc = mqttpush(self._mqttbroker)
         main_channel = self._mqttbroker.get('PUBLISH','/OPENHAB')
 
-        for deviceId, measurement in data.items():
-            channel = main_channel + '/' + deviceId
-            self._log.debug('channel: %s, mesage %s'% (channel,measurement))
-            mqttc.publish(channel,measurement)
+        for item, measurement in data.items():
+            _channel = main_channel + '/' + channel + '/' + item
+            self._log.debug('channel: %s, mesage %s'% (_channel,measurement))
+            mqttc.publish(_channel,measurement)
 
         return True
 
@@ -92,8 +102,8 @@ class manager(object):
         self.logger()
 
         self._log.info('Startup, %s %s %s'% ( __app__, __VERSION__, __DATE__) )
-        data = self.modbus()
-        self.publishData(data)
+        self.modbus()
+       # self.publishData(data)
 
 
 
@@ -103,6 +113,7 @@ if __name__ == '__main__':
         configfile = sys.argv[1]
     else:
         configfile ='/opt/Modbus2mqtt/modbus2mqtt.cfg'
+     #   configfile = 'modbus2mqtt.cfg'
 
     mgr_handle = manager(configfile)
     mgr_handle.run()
