@@ -10,7 +10,8 @@ class mqttclient(Thread):
         Thread.__init__(self)
         self._host = str(config.get('HOST', 'localhost'))
         self._port = int(config.get('PORT', 1883))
-        self._subscribe = config.get('SUBSCRIBE','/MYTOPIC')
+        self._subscribe = str(config.get('SUBSCRIBE','/MYTOPIC'))
+        self._publish = str(config.get('PUBLISH','/OPENHAB'))
         print('mqtt client',config)
         self._mqttc = mqtt.Client(str(os.getpid()), clean_session=True)
 
@@ -50,12 +51,14 @@ class mqttclient(Thread):
         self._mqttc.connect(self._host,self._port)
 
     def publish(self,topic,payload):
-        self._mqttc.publish(topic,payload,0)
+        _topic = str(self._publish + '/' + topic)
+        print('Publish',_topic,payload)
+        self._mqttc.publish(_topic,payload,0)
 
     def run(self):
        # self._mqttc.connect("192.168.2.50", 1883, 60)
     #    self.subscribe("/MYSTROM/#")
-        print('run')
+        print('Start Broker')
 
         rc = 0
         while rc == 0:

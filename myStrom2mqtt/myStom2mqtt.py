@@ -34,10 +34,6 @@ from library.mystrom import bulbwrapper
 from library.mystrom import bulb
 
 
-class xyz(object):
-    def out(self,data):
-        print('test',data)
-
 class manager(object):
 
     def __init__(self,cfg_file='myStrom2mqtt.cfg'):
@@ -73,10 +69,15 @@ class manager(object):
         self._log.level(self._cfg_log.get('LOGLEVEL','DEBUG'))
         return True
 
-    def start_broker(self):
+    def config_broker(self):
         self._mqttc = mqttclient(self._cfg_broker)
 #        self._mqttc.subscribe(self._cfg_broker.get('SUBSCRIBE','/MYSTROM'))
+
         return True
+
+    def start_broker(self):
+        self._mqttc.start()
+
 
     def start_devices(self):
         print('Device config',self._cfg_device)
@@ -84,9 +85,10 @@ class manager(object):
         _bulb_cfg = self._cfg_device.get('BULB', None)
 
         if _switch_cfg:
-            for item in _switch_cfg:
-                print('SWITCH',item)
-                _switchwrapper = switchwrapper(self._cfg_device.get('SWITCH', None),self._mqttc)
+            #for item in _switch_cfg:
+             #   print('SWITCH',item)
+            _switchwrapper = switchwrapper(self._cfg_device.get('SWITCH', None),self._mqttc)
+            _switchwrapper.start()
 
       #  if _bulb_cfg:
            # _bulb_cfg['BROKER']= self._mqttc
@@ -114,10 +116,13 @@ class manager(object):
         """
         self.read_config()
         self.start_logger()
-        self.start_broker()
+        self.config_broker()
     #    self.publish_test()
         self.start_devices()
-        time.sleep(15)
+        self.start_broker()
+        test = 1
+        while(True):
+            test = test+1
 
        # self._log.info('Startup, %s %s %s'% ( __app__, __VERSION__, __DATE__) )
 #        self.start_gpio()

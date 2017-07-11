@@ -7,41 +7,72 @@ class switch(object):
     def __init__(self,ip):
 
         self._url= 'http://'+ ip
-
-    def ___status(self):
-        call = self._url + '/report'
-        print('print call',call)
-        return call
+        self._switch = 'OFF'
+        self._power = 0.0
+        self._energy = 0.0
+        self._t0 = time.time()
 
     def _status(self):
-        r = requests.get(self._url + '/report')
-        print(r.text)
-        return r.json()
+        info ="""{"power":0.0,"relay": false}"""
+        result = json.loads(info)
 
-    def on_status(self):
-        status = self._status()
-        return bool(status['relay'])
+        try:
+            r = requests.get(self._url + '/report',timeout = 5)
+#            print(r.text)
+            return (True,r.json())
+        except requests.Timeout:
+            print('TIMEOUT')
+        return (False,result)
 
+    def update(self):
+        _result = 0
+        value, _status = self._status()
+        print('status',_status)
+        if value:
+
+            if bool(_status['relay']):
+                self._switch = 'ON'
+                _result = 1
+            else:
+                self._switch = 'OFF'
+                _result = 0
+
+            self._power = float(_status['power'])
+            _t1 = time.time() - self._t0
+            self._t0 = time.time()
+            print(_t1,self._power)
+            self._energy = self._power * _t1 / 3600 / 1000
+
+        return _result
+
+    def power(self):
+        return self._power
+
+    def switch(self):
+        return self._switch
+
+    def energy(self):
+        return self._energy
 
 class switchwrapper(Thread):
     def __init__(self,config,broker):
         Thread.__init__(self)
 
-        print('switchwrappter',config)
+        print('switchwrapper',config)
 
         self._broker = broker
         self._config = config
 
         self._processId = {}
 
-        self.start()
+        self.config()
 
-    def start(self):
+    def config(self):
 
         for key,item in self._config.items():
         #    print('print',key,item.get('IP', None),item.get('MAC',None))
             self._processId[key] = switch(item.get('IP', None))
-            print(self._processId[key].on_status())
+            print(self._processId[key].update())
 
  #       print('processId',self._processId)
 #        self._broker.publish('test','123')
@@ -53,8 +84,9 @@ class switchwrapper(Thread):
         return
 
     def run(self):
+        print('START Thread Switch')
       #  self._broker.subscribe(self.update)
-        self._broker.sub_callback(self.update)
+        self._broker.callback('/TEST/tt',self.update)
 
         while(True):
             print('test')
@@ -62,9 +94,16 @@ class switchwrapper(Thread):
                 # read power status
                # if item.on_status:
                 #publish ligh status On/Off
-                self._broker.publish(key,item.on_status)
+                #print(item.on_st())
+                item.update()
+                _key = str(key + '/SWITCH')
+                self._broker.publish(_key,item.switch())
                 #publish power consumption
-                self._broker.publish(key,item.power())
+                _key = str(key + '/POWER')
+                self._broker.publish(_key,item.power())
+                _key = str(key + '/ENERGY')
+                self._broker.publish(_key,item.energy())
+                time.sleep(5)
 
         return
 
