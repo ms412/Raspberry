@@ -1,13 +1,14 @@
-
 import requests
 import time
+import json
+from threading import Thread
 
 
 class bulb(object):
     def __init__(self,ip,mac):
        # self._ip = ip
       # self._mac = mac
-
+        print('bulb class',ip, mac)
         self._url = 'http://'+ ip +'/api/v1/device/'+ mac
 
         self._payload = {'action': 'on'}
@@ -68,6 +69,14 @@ class bulb(object):
         payload = {'mode': mode}
         self.post(payload)
 
+    def on_status(self,mode):
+        status = self.status()
+        for each in status:
+            on_status = bool(status[each]['on'])
+            #print('current color',power)
+
+        return on_status
+
     def power(self):
         status = self.status()
         for each in status:
@@ -93,6 +102,46 @@ class bulb(object):
             self.dimmer(count)
             count = count + 1
             time.sleep(steps)
+
+
+class bulbwrapper(Thread):
+    def __init__(self,config,broker):
+        Thread.__init__(self)
+
+        print('bulbwrappter',config)
+
+        self._broker = broker
+        self._config = config
+
+        self._processId = {}
+
+        self.start()
+
+    def start(self):
+
+        for key,item in self._config.items():
+        #    print('print',key,item.get('IP', None),item.get('MAC',None))
+            self._processId[key] = bulb(item.get('IP', None),item.get('MAC',None))
+
+ #       print('processId',self._processId)
+#        self._broker.publish('test','123')
+
+    def update(self,channel,msg):
+
+        return
+
+    def run(self):
+
+        while(True):
+            print('test')
+            for key,item in self._processId.items():
+                # read power status
+               # if item.on_status:
+                #publish ligh status On/Off
+                self._broker.publish(key,item.on_status)
+                #publish power consumption
+                self._broker.publish(key,item.power())
+
 
 
 if __name__ == '__main__':

@@ -27,10 +27,16 @@ import time
 import json
 
 from configobj import ConfigObj
-from library.mqttpush import mqttpush
+from library.mqttclient import mqttclient
 from library.loghandler import loghandler
+from library.myStromSwitch import switchwrapper
+from library.mystrom import bulbwrapper
 from library.mystrom import bulb
-#from library.S0Manager import S0manager
+
+
+class xyz(object):
+    def out(self,data):
+        print('test',data)
 
 class manager(object):
 
@@ -40,7 +46,9 @@ class manager(object):
 
         self._cfg_broker = None
         self._cfg_log = None
-        self._cfg_gpio = None
+        self._cfg_device = None
+
+        self._mqttc = None
 
 
     def read_config(self):
@@ -54,8 +62,8 @@ class manager(object):
 
         self._cfg_broker = _cfg.get('BROKER',None)
         self._cfg_log = _cfg.get('LOGGING',None)
-        self._cfg_bulb = _cfg.get('BULB',None)
-        self._cfg_switch = _cfg.get('SWITCH',None)
+        self._cfg_device = _cfg.get('DEVICE',None)
+       # self._cfg_switch = _cfg.get('SWITCH',None)
         return True
 
     def start_logger(self):
@@ -65,43 +73,40 @@ class manager(object):
         self._log.level(self._cfg_log.get('LOGLEVEL','DEBUG'))
         return True
 
-    def publishData(self,data):
-        mqttc = mqttpush(self._mqttbroker)
-        main_channel = self._mqttbroker.get('PUBLISH','/OPENHAB')
+    def start_broker(self):
+        self._mqttc = mqttclient(self._cfg_broker)
+#        self._mqttc.subscribe(self._cfg_broker.get('SUBSCRIBE','/MYSTROM'))
+        return True
 
-        for deviceId, measurement in data.items():
-            channel = main_channel + '/' + deviceId
-          #  print('channel',channel,deviceId)
-            mqttc.publish(channel,measurement)
+    def start_devices(self):
+        print('Device config',self._cfg_device)
+        _switch_cfg = self._cfg_device.get('SWITCH',None)
+        _bulb_cfg = self._cfg_device.get('BULB', None)
+
+        if _switch_cfg:
+            for item in _switch_cfg:
+                print('SWITCH',item)
+                _switchwrapper = switchwrapper(self._cfg_device.get('SWITCH', None),self._mqttc)
+
+      #  if _bulb_cfg:
+           # _bulb_cfg['BROKER']= self._mqttc
+       #     _bulbwrapper = bulbwrapper(self._cfg_device.get('BULB', None),self._mqttc)
+       #     for item in _bulb_cfg:
+        #        print('Bulb', item)
+
 
         return True
 
-    def start_gpio(self):
-      #  self.msgbus_subscribe
-        self._log.debug('Start GPIO Interface with configuration: %s'% (self._cfg_gpio))
-        self._S0mgr = S0manager(self._cfg_gpio,self.msgAdapter,self._log)
-     #   self._gpio = gpio(self._cfg_gpio,'GPIO_SNK','GPIO_SRC','LOG')
-        self._S0mgr.start()
-        return True
 
-    def msgAdapter(self,msg):
-        #print('msg',msg)
-        for deviceId, data in msg.items():
-            self.publishData(deviceId,json.dumps(data))
 
-        return True
+    def publish_test(self):
+        x = xyz()
+        print('test',x)
+        self._mqttc.subscribe("/MYSTROM/#",x)
+        self._mqttc.start()
+       # time.sleep(10)
+        self._mqttc.publish('/MYSTROM/mySwitch001','TEST')
 
-    def publishData(self,deviceId,data):
-        mqttc = mqttpush(self._cfg_broker)
-        main_channel = self._cfg_broker.get('PUBLISH','/OPENHAB')
-
-       # for deviceId, measurement in data.items():
-        channel = main_channel + '/' + deviceId
-          #  print('channel',channel,deviceId)
-        self._log.debug('Push to mqtt server %s: %s'%(channel,deviceId))
-        mqttc.publish(channel,data)
-
-        return True
 
     def run(self):
         """
@@ -109,19 +114,14 @@ class manager(object):
         """
         self.read_config()
         self.start_logger()
-        time.sleep(2)
+        self.start_broker()
+    #    self.publish_test()
+        self.start_devices()
+        time.sleep(15)
 
-        self._log.info('Startup, %s %s %s'% ( __app__, __VERSION__, __DATE__) )
+       # self._log.info('Startup, %s %s %s'% ( __app__, __VERSION__, __DATE__) )
 #        self.start_gpio()
 
-        while(True):
-            if not self._S0mgr.isAlive():
-                self._log.critical('%s died... restrart'%(__app__))
-                self._S0mgr.__del__()
-                self.start_gpio()
-
-            else:
-                time.sleep(10)
 
 if __name__ == "__main__":
 
