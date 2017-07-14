@@ -44,8 +44,10 @@ class mqttclient(Thread):
         print('tt',_topic)
         self._mqttc.subscribe(_topic,0)
 
-    def callback(self,topic,data):
-        self._mqttc.message_callback_add(topic,data)
+    def callback(self,topic,method):
+        _topic =str(self._subscribe + '/' + topic)
+        self._mqttc.message_callback_add(_topic,method)
+        print('register callback',_topic,method)
 
     def connect(self):
         self._mqttc.connect(self._host,self._port)
