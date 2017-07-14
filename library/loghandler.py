@@ -39,6 +39,13 @@ class loghandler(object):
             formatter = logging.Formatter('%(asctime)s %(name)s: %(levelname)s %(message)s'.format(hostname),'%b %e %H:%M:%S')
             handler.setFormatter(formatter)
 
+        else:
+            file = config.get('LOGFILE','./logger.log')
+            handler = logging.FileHandler(file)
+            formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s','%b %e %H:%M:%S')
+            handler.setFormatter(formatter)
+
+
         self._logger.addHandler(handler)
 
         return True

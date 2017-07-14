@@ -70,7 +70,7 @@ class manager(object):
         return True
 
     def config_broker(self):
-        self._mqttc = mqttclient(self._cfg_broker)
+        self._mqttc = mqttclient(self._cfg_broker,self._log)
 #        self._mqttc.subscribe(self._cfg_broker.get('SUBSCRIBE','/MYSTROM'))
 
         return True
