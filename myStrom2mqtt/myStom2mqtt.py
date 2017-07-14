@@ -30,6 +30,7 @@ from configobj import ConfigObj
 from library.mqttclient import mqttclient
 from library.loghandler import loghandler
 from library.myStromSwitch import switchwrapper
+
 from library.mystrom import bulbwrapper
 from library.mystrom import bulb
 
@@ -64,7 +65,6 @@ class manager(object):
 
     def start_logger(self):
         self._log = loghandler('MYSTROM2MQTT')
-        print(self._cfg_log)
         self._log.handle(self._cfg_log.get('LOGMODE'),self._cfg_log)
         self._log.level(self._cfg_log.get('LOGLEVEL','DEBUG'))
         return True
@@ -87,27 +87,10 @@ class manager(object):
         if _switch_cfg:
             #for item in _switch_cfg:
              #   print('SWITCH',item)
-            _switchwrapper = switchwrapper(self._cfg_device.get('SWITCH', None),self._mqttc)
+            _switchwrapper = switchwrapper(self._cfg_device.get('SWITCH', None),self._mqttc,self._log)
             _switchwrapper.start()
 
-      #  if _bulb_cfg:
-           # _bulb_cfg['BROKER']= self._mqttc
-       #     _bulbwrapper = bulbwrapper(self._cfg_device.get('BULB', None),self._mqttc)
-       #     for item in _bulb_cfg:
-        #        print('Bulb', item)
-
-
         return True
-
-
-
-    def publish_test(self):
-        x = xyz()
-        print('test',x)
-        self._mqttc.subscribe("/MYSTROM/#",x)
-        self._mqttc.start()
-       # time.sleep(10)
-        self._mqttc.publish('/MYSTROM/mySwitch001','TEST')
 
 
     def run(self):
@@ -116,6 +99,11 @@ class manager(object):
         """
         self.read_config()
         self.start_logger()
+        # Log information
+        msg = 'Start ' + __app__ +' ' +  __VERSION__ + ' ' +  __DATE__
+        self._log.info(msg)
+
+
         self.config_broker()
     #    self.publish_test()
         self.start_devices()

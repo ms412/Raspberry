@@ -1,3 +1,27 @@
+#!/usr/bin/env python3
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program. If not, see <http://www.gnu.org/licenses/>.
+
+
+__app__ = "loghandler"
+__VERSION__ = "0.8"
+__DATE__ = "09.07.2017"
+__author__ = "Markus Schiesser"
+__contact__ = "M.Schiesser@gmail.com"
+__copyright__ = "Copyright (C) 2017 Markus Schiesser"
+__license__ = 'GPL v3'
+
+
 import logging
 import logging.handlers
 import socket
@@ -71,6 +95,23 @@ class loghandler(object):
     def critical(self,msg):
 #        print('critical',msg)
         self._logger.critical(msg)
+
+
+class dummylog(object):
+    def debug(self, msg):
+        print('DEBUG',msg)
+
+    def info(self, msg):
+        print('INFO',msg)
+
+    def warning(self, msg):
+        print('WARNING',msg)
+
+    def error(self, msg):
+        print('ERROR',msg)
+
+    def critical(self, msg):
+        print('CRITICAL',msg)
 
 class app(object):
 

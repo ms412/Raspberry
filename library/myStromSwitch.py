@@ -1,3 +1,27 @@
+#!/usr/bin/env python3
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program. If not, see <http://www.gnu.org/licenses/>.
+
+
+__app__ = "myStrom switch"
+__VERSION__ = "0.6"
+__DATE__ = "14.07.2017"
+__author__ = "Markus Schiesser"
+__contact__ = "M.Schiesser@gmail.com"
+__copyright__ = "Copyright (C) 2017 Markus Schiesser"
+__license__ = 'GPL v3'
+
+
 import requests
 import time
 import json
@@ -10,8 +34,6 @@ class switch(object):
         self._url= 'http://'+ self._config.get('IP',None)
         self._switch = 'OFF'
         self._power = 0.0
-     #   self._energy = 0.0
-      #  self._t0 = time.time()
 
     def _status(self):
         info ="""{"power":0.0,"relay": false}"""
@@ -23,6 +45,8 @@ class switch(object):
             return (True,r.json())
         except requests.Timeout:
             print('TIMEOUT')
+        except requests.exeptions.ConnectionError:
+            print('CONNECTION Error')
         return (False,result)
 
     def getStatus(self):
@@ -74,13 +98,20 @@ class switch(object):
 
 
 class switchwrapper(Thread):
-    def __init__(self,config,broker):
+    def __init__(self,config,broker,loghandle):
         Thread.__init__(self)
 
         print('switchwrapper',config)
 
         self._broker = broker
         self._config = config
+        self._log = loghandle
+
+        msg = 'Start ' + __app__ +' ' +  __VERSION__ + ' ' +  __DATE__
+        self._log.info(msg)
+
+        msg = 'Configuration' + str(config)
+        self._log.debug(msg)
 
         self._processId = {}
 
@@ -97,8 +128,6 @@ class switchwrapper(Thread):
             _key = str(key + '/SWITCH')
             self._broker.callback(_key,self.msg_snk)
 
- #       print('processId',self._processId)
-#        self._broker.publish('test','123')
         return
 
     def msg_snk(self,mqttc, obj,msg):
@@ -134,26 +163,14 @@ class switchwrapper(Thread):
         return True
 
     def run(self):
-        print('START Thread Switch')
-      #  self._broker.subscribe(self.update)
- #       self._broker.callback('/TEST/tt',self.update)
+       # print('START Thread Switch')
+        msg = __app__ + 'start broker as thread'
+        self._log.debug(msg)
 #
         while(True):
           #  print('test')
             for key,item in self._processId.items():
-                # read power status
-               # if item.on_status:
-                #publish ligh status On/Off
-                #print(item.on_st())
-             #   item.getStatus()
                 self.update(key,item)
-             #   _key = str(key + '/SWITCH')
-              #  self._broker.publish(_key,item.getSwitch())
-                #publish power consumption
-              #  _key = str(key + '/POWER')
-               # self._broker.publish(_key,item.getPower())
-                #_key = str(key + '/ENERGY')
-               # self._broker.publish(_key,item.energy())
                 time.sleep(5)
 
         return
