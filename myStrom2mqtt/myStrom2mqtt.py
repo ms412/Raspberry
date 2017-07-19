@@ -31,8 +31,8 @@ from library.mqttclient import mqttclient
 from library.loghandler import loghandler
 from library.myStromSwitch import switchwrapper
 
-from library.mystrom import bulbwrapper
-from library.mystrom import bulb
+from library.myStromBulb import bulbwrapper
+from library.myStromBulb import bulb
 
 
 class manager(object):
@@ -53,7 +53,7 @@ class manager(object):
         _cfg = ConfigObj(self._cfg_file)
 
         if bool(_cfg) is False:
-            print('ERROR config file not found',self._cfg_file)
+        #    print('ERROR config file not found',self._cfg_file)
             sys.exit()
             #exit
 
@@ -80,7 +80,7 @@ class manager(object):
 
 
     def start_devices(self):
-        print('Device config',self._cfg_device)
+        #print('Device config',self._cfg_device)
         _switch_cfg = self._cfg_device.get('SWITCH',None)
         _bulb_cfg = self._cfg_device.get('BULB', None)
 
@@ -89,6 +89,10 @@ class manager(object):
              #   print('SWITCH',item)
             _switchwrapper = switchwrapper(self._cfg_device.get('SWITCH', None),self._mqttc,self._log)
             _switchwrapper.start()
+
+        if _bulb_cfg:
+            _bulbwrapper = bulbwrapper(self._cfg_device.get('BULB'),self._mqttc,self._log)
+            _bulbwrapper.start()
 
         return True
 

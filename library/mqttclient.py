@@ -25,11 +25,11 @@ import os
 import time
 from threading import Thread
 import paho.mqtt.client as mqtt
-from library.loghandler import dummylog
+#from library.loghandler import dummylog
 
 
 class mqttclient(Thread):
-    def __init__(self,config,loghandle=None):
+    def __init__(self,config,loghandle):
         Thread.__init__(self)
 
         self._host = str(config.get('HOST', 'localhost'))
@@ -37,11 +37,8 @@ class mqttclient(Thread):
         self._subscribe = str(config.get('SUBSCRIBE','/MYTOPIC'))
         self._publish = str(config.get('PUBLISH','/OPENHAB'))
         #print('mqtt client',config)
-        if not loghandle:
-            print('none')
-            self._log = dummylog()
-        else:
-            self._log = loghandle
+
+        self._log = loghandle
 
         msg = 'Start ' + __app__ +' ' +  __VERSION__ + ' ' +  __DATE__
         self._log.info(msg)
@@ -103,7 +100,7 @@ class mqttclient(Thread):
         self._log.debug(msg)
 
     def connect(self):
-        self._mqttc.connect(self._host,self._port)
+         self._mqttc.connect(self._host,self._port)
 
     def publish(self,topic,payload):
         _topic = str(self._publish + '/' + topic)

@@ -13,9 +13,9 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 
-__app__ = "myStrom switch"
-__VERSION__ = "0.6"
-__DATE__ = "14.07.2017"
+__app__ = "myStrom Switch"
+__VERSION__ = "0.7"
+__DATE__ = "19.07.2017"
 __author__ = "Markus Schiesser"
 __contact__ = "M.Schiesser@gmail.com"
 __copyright__ = "Copyright (C) 2017 Markus Schiesser"
@@ -28,9 +28,10 @@ import json
 from threading import Thread
 
 class switch(object):
-    def __init__(self,config):
+    def __init__(self,config,log):
 
         self._config = config
+        self._log = log
         self._url= 'http://'+ self._config.get('IP',None)
         self._switch = 'OFF'
         self._power = 0.0
@@ -42,19 +43,26 @@ class switch(object):
         try:
             r = requests.get(self._url + '/report',timeout = 5)
 #            print(r.text)
+            msg = 'Get Status' + str(self._url) + str(r.json())
+            self._log.debug(msg)
+
             return (True,r.json())
         except requests.Timeout:
-            print('TIMEOUT')
-        except requests.exeptions.ConnectionError:
-            print('CONNECTION Error')
+            msg = 'TIMEOUT' + str(self._url)
+            self._log.error(msg)
+           # print('TIMEOUT')
+        except requests.exceptions.ConnectionError:
+            msg = 'CONNECTION Error' + str(self._url)
+            self._log.error(msg)
+          #  print('CONNECTION Error')
         return (False,result)
 
     def getStatus(self):
         _result = 0
         _value, _status = self._status()
-        print('status',_status, _value)
+  #      print('status',_status, _value)
         if _value:
-            print('True')
+  #          print('True')
             if bool(_status['relay']):
                 self._switch = 'ON'
                 _result = 1
@@ -74,24 +82,35 @@ class switch(object):
         return self._power
 
     def getSwitch(self):
-        print('switch', self._switch)
+       # print('switch', self._switch)
         return self._switch
 
     def setSwitch(self,state):
         if not 'LOCK' == self._config.get('SWITCH','UNLOCK').upper():
-            print('switch is not in lock mode')
+ #           print('switch is not in lock mode')
+            msg = 'Set Status' + str(self._url) + str(state)
+            self._log.debug(msg)
+
             if 'ON'in state:
                 _url = self._url + '/relay?state=1'
             else:
                 _url = self._url + '/relay?state=0'
-            print('requests',_url)
+           # print('requests',_url)
             try:
                 requests.get(_url,timeout=5)
             except requests.Timeout:
-                print('TIMEOUT')
+     #           print('TIMEOUT')
+                msg = 'TIMEOUT cannot set state' + str(self._url) + str(state)
+                self._log.error(msg)
+            except requests.exceptions.ConnectionError:
+                msg = 'CONNECTION Error' + str(self._url)
+                self._log.error(msg)
+
           #  r = requests.get(self._url + '/report', timeout=5)
         else:
-            print('switch is in lock mode no change')
+           # print('switch is in lock mode no change')
+            msg = 'Node in LOCK mode cannot write to Node' + str(self._url) + str(state)
+            self._log.warning(msg)
        # print('test0',r.json())
         return True
 
@@ -101,7 +120,7 @@ class switchwrapper(Thread):
     def __init__(self,config,broker,loghandle):
         Thread.__init__(self)
 
-        print('switchwrapper',config)
+       # print('switchwrapper',config)
 
         self._broker = broker
         self._config = config
@@ -121,33 +140,42 @@ class switchwrapper(Thread):
 
         for key,item in self._config.items():
         #    print('print',key,item.get('IP', None),item.get('MAC',None))
-            self._processId[key] = switch(item)
-            print(self._processId[key].getStatus())
+            self._processId[key] = switch(item,self._log)
+
+#            print(self._processId[key].getStatus())
 
             #subscribe callback of mqtt
             _key = str(key + '/SWITCH')
             self._broker.callback(_key,self.msg_snk)
 
+            msg = 'Create Switch Object and connect to a Broker Channel: ' + str(_key)
+            self._log.debug(msg)
+
         return
 
     def msg_snk(self,mqttc, obj,msg):
-        print('received from mqtt',obj,msg.topic,msg.payload)
+       # print('received from mqtt',obj,msg.topic,msg.payload)
         _topic_split = msg.topic.split('/')
         _key_topic = _topic_split[-1]
         if 'SWITCH' == _key_topic:
             self.cmd_switch(msg.topic,msg.payload)
+            msg = 'Received SWITCH command from Broker'
+            self._log.debug(msg)
         else:
-            print('command not found:',_key_topic)
+         #   print('command not found:',_key_topic)
+            msg = 'Received UNKNOWN command from Broker' + str(_key_topic)
+            self._log.error(msg)
 
         return True
 
     def cmd_switch(self,topic,payload):
         _topic_split = topic.split('/')
         _key_topic = _topic_split[-2]
-        print('_topic_key', _key_topic)
+       # print('_topic_key', _key_topic)
         for key,item in self._processId.items():
             if key in _key_topic:
-                print(key,_key_topic,payload)
+               # print(key,_key_topic,payload)
+                msg = 'Command: ' + str(payload) + 'for Item: ' + str(_key_topic)
                 self._processId[key].setSwitch(str(payload))
                 self._processId[key].getStatus()
                 self.update(key,self._processId[key])

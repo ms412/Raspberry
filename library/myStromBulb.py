@@ -1,3 +1,27 @@
+#!/usr/bin/env python3
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program. If not, see <http://www.gnu.org/licenses/>.
+
+
+__app__ = "myStrom Bulb"
+__VERSION__ = "0.4"
+__DATE__ = "19.07.2017"
+__author__ = "Markus Schiesser"
+__contact__ = "M.Schiesser@gmail.com"
+__copyright__ = "Copyright (C) 2017 Markus Schiesser"
+__license__ = 'GPL v3'
+
+
 import requests
 import time
 import json
@@ -5,9 +29,10 @@ from threading import Thread
 
 
 class bulb(object):
-    def __init__(self,ip,mac):
+    def __init__(self,ip,mac,log):
        # self._ip = ip
       # self._mac = mac
+        self._log = log
         print('bulb class',ip, mac)
         self._url = 'http://'+ ip +'/api/v1/device/'+ mac
 
@@ -85,7 +110,6 @@ class bulb(object):
 
         return power
 
-
     def dimmer(self,value):
         payload = {'ramp': (value*1000)}
         print(payload)
@@ -105,6 +129,95 @@ class bulb(object):
 
 
 class bulbwrapper(Thread):
+    def __init__(self, config, broker, loghandle):
+        Thread.__init__(self)
+
+        print('bulbwrapper', config)
+
+        self._broker = broker
+        self._config = config
+        self._log = loghandle
+
+        msg = 'Start ' + __app__ + ' ' + __VERSION__ + ' ' + __DATE__
+        self._log.info(msg)
+
+        msg = 'Configuration' + str(config)
+        self._log.debug(msg)
+
+        self._processId = {}
+
+        self.config()
+
+    def config(self):
+
+        for key, item in self._config.items():
+            #    print('print',key,item.get('IP', None),item.get('MAC',None))
+            self._processId[key] = bulb(item, self._log)
+
+            #            print(self._processId[key].getStatus())
+
+            # subscribe callback of mqtt
+            _key = str(key + '/BULB')
+            self._broker.callback(_key, self.msg_snk)
+
+            msg = 'Create Switch Object and connect to a Broker Channel: ' + str(_key)
+            self._log.debug(msg)
+
+        return
+
+        def msg_snk(self, mqttc, obj, msg):
+            # print('received from mqtt',obj,msg.topic,msg.payload)
+            _topic_split = msg.topic.split('/')
+            _key_topic = _topic_split[-1]
+            if 'SWITCH' == _key_topic:
+                self.cmd_switch(msg.topic, msg.payload)
+                msg = 'Received SWITCH command from Broker'
+                self._log.debug(msg)
+            else:
+                #   print('command not found:',_key_topic)
+                msg = 'Received UNKNOWN command from Broker' + str(_key_topic)
+                self._log.error(msg)
+
+            return True
+
+        def cmd_switch(self, topic, payload):
+            _topic_split = topic.split('/')
+            _key_topic = _topic_split[-2]
+            # print('_topic_key', _key_topic)
+            for key, item in self._processId.items():
+                if key in _key_topic:
+                    # print(key,_key_topic,payload)
+                    msg = 'Command: ' + str(payload) + 'for Item: ' + str(_key_topic)
+                    self._processId[key].setSwitch(str(payload))
+                    self._processId[key].getStatus()
+                    self.update(key, self._processId[key])
+
+        def update(self, topic, obj):
+            obj.getStatus()
+            _topic = str(topic + '/SWITCH')
+            self._broker.publish(_topic, obj.getSwitch())
+
+            _topic = str(topic + '/POWER')
+            self._broker.publish(_topic, obj.getPower())
+
+            return True
+
+        def run(self):
+            # print('START Thread Switch')
+            msg = __app__ + 'start broker as thread'
+            self._log.debug(msg)
+            #
+            while (True):
+                #  print('test')
+                for key, item in self._processId.items():
+                    self.update(key, item)
+                    time.sleep(5)
+
+            return
+
+
+
+
     def __init__(self,config,broker):
         Thread.__init__(self)
 
