@@ -118,7 +118,7 @@ class mqttclient(Thread):
 
         rc = 0
         while rc == 0:
-            print('x')
+       #     print('x')
             rc = self._mqttc.loop_forever()
         return rc
 

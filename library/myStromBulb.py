@@ -218,13 +218,14 @@ class bulbwrapper(Thread):
 
 
 
-    def __init__(self,config,broker):
+    def __init__(self,config,broker,loghandle):
         Thread.__init__(self)
 
         print('bulbwrappter',config)
 
         self._broker = broker
         self._config = config
+        self._log = loghandle
 
         self._processId = {}
 

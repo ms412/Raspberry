@@ -153,18 +153,18 @@ class switchwrapper(Thread):
 
         return
 
-    def msg_snk(self,mqttc, obj,msg):
+    def msg_snk(self,mqttc, obj,payload):
        # print('received from mqtt',obj,msg.topic,msg.payload)
-        _topic_split = msg.topic.split('/')
+        _topic_split = payload.topic.split('/')
         _key_topic = _topic_split[-1]
         if 'SWITCH' == _key_topic:
-            self.cmd_switch(msg.topic,msg.payload)
-            msg = 'Received SWITCH command from Broker'
-            self._log.debug(msg)
+            _msg = 'Received SWITCH command from Broker'
+            self._log.debug(_msg)
+            self.cmd_switch(payload.topic, payload.payload)
         else:
          #   print('command not found:',_key_topic)
-            msg = 'Received UNKNOWN command from Broker' + str(_key_topic)
-            self._log.error(msg)
+            _msg = 'Received UNKNOWN command from Broker' + str(_key_topic)
+            self._log.error(_msg)
 
         return True
 
@@ -176,8 +176,9 @@ class switchwrapper(Thread):
             if key in _key_topic:
                # print(key,_key_topic,payload)
                 msg = 'Command: ' + str(payload) + 'for Item: ' + str(_key_topic)
+                self._log.info(msg)
                 self._processId[key].setSwitch(str(payload))
-                self._processId[key].getStatus()
+              #  self._processId[key].getStatus()
                 self.update(key,self._processId[key])
 
     def update(self,topic,obj):

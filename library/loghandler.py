@@ -52,7 +52,7 @@ class loghandler(object):
         return True
 
     def handle(self,methode,config):
-        print (methode)
+     #   print (methode)
         if 'SYSLOG' in methode:
           #  print('Ssyslog',config )
             host = config.get('LOGSERVER','localhost')

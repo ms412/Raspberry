@@ -90,9 +90,9 @@ class manager(object):
             _switchwrapper = switchwrapper(self._cfg_device.get('SWITCH', None),self._mqttc,self._log)
             _switchwrapper.start()
 
-        if _bulb_cfg:
-            _bulbwrapper = bulbwrapper(self._cfg_device.get('BULB'),self._mqttc,self._log)
-            _bulbwrapper.start()
+        #if _bulb_cfg:
+       #     _bulbwrapper = bulbwrapper(self._cfg_device.get('BULB'),self._mqttc,self._log)
+       #     _bulbwrapper.start()
 
         return True
 
@@ -112,9 +112,9 @@ class manager(object):
     #    self.publish_test()
         self.start_devices()
         self.start_broker()
-        test = 1
-        while(True):
-            test = test+1
+        #test = 1
+       # while(True):
+        #    test = test+1
 
        # self._log.info('Startup, %s %s %s'% ( __app__, __VERSION__, __DATE__) )
 #        self.start_gpio()
@@ -122,7 +122,7 @@ class manager(object):
 
 if __name__ == "__main__":
 
-    print ('main')
+  #  print ('main')
     if len(sys.argv) == 2:
         configfile = sys.argv[1]
     else:
