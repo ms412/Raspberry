@@ -36,13 +36,9 @@ class loghandler(object):
         self._logger = logging.getLogger(name)
         self._logger.setLevel(logging.DEBUG)
 
-   #     hostname = socket.gethostname()
-    #    formatter = logging.Formatter('%(asctime)s %(name)s: %(levelname)s %(message)s'.format(hostname),'%b %e %H:%M:%S')
-
-     #   handler = logging.handlers.SysLogHandler(address=(syslogHost, 514), facility=19)
-      #  handler.setFormatter(formatter)
-
-       # self._logger.addHandler(handler)
+    def __del__(self):
+        _msg = 'Kill myself' + __app__
+        self._log.error(_msg)
 
     def level(self,level):
         if level in 'INFO':

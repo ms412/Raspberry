@@ -46,7 +46,11 @@ class manager(object):
         self._cfg_device = None
 
         self._mqttc = None
+        self._switchwrapper = None
 
+    def __del__(self):
+        _msg = 'Kill myself' + __app__
+        self._log.error(_msg)
 
     def read_config(self):
 
@@ -87,12 +91,36 @@ class manager(object):
         if _switch_cfg:
             #for item in _switch_cfg:
              #   print('SWITCH',item)
-            _switchwrapper = switchwrapper(self._cfg_device.get('SWITCH', None),self._mqttc,self._log)
-            _switchwrapper.start()
+            self._switchwrapper = switchwrapper(self._cfg_device.get('SWITCH', None),self._mqttc,self._log)
+            self._switchwrapper.start()
 
         #if _bulb_cfg:
        #     _bulbwrapper = bulbwrapper(self._cfg_device.get('BULB'),self._mqttc,self._log)
        #     _bulbwrapper.start()
+
+        return True
+
+    def thread_monitor(self):
+        if self._mqttc.is_alive():
+            _msg = 'Thread MQTT running'
+            self._log.debug(_msg)
+        else:
+            _msg = 'Thread MQTT' + str(self._mqttc) + 'NOT running any more...Restart'
+            self._log.critical(_msg)
+
+            time.sleep(1)
+            self.config_broker()
+            self.start_broker()
+
+        if self._switchwrapper.is_alive():
+            _msg = 'Thread SWITCHWRAPPER running'
+            self._log.debug(_msg)
+        else:
+            _msg = 'Thread SWITCHWRAPPER ' + str(self._mqttc) + 'NOT running any more...Restart'
+            self._log.critical(_msg)
+
+            time.sleep(1)
+            self._start_devices()
 
         return True
 
@@ -113,7 +141,9 @@ class manager(object):
         self.start_devices()
         self.start_broker()
         #test = 1
-       # while(True):
+        while(True):
+            time.sleep(30)
+            self.thread_monitor()
         #    test = test+1
 
        # self._log.info('Startup, %s %s %s'% ( __app__, __VERSION__, __DATE__) )

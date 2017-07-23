@@ -36,6 +36,10 @@ class switch(object):
         self._switch = 'OFF'
         self._power = 0.0
 
+    def __del__(self):
+        _msg = 'Kill myself' + __app__ + 'switch object'
+        self._log.error(_msg)
+
     def _status(self):
         info ="""{"power":0.0,"relay": false}"""
         result = json.loads(info)
@@ -136,6 +140,10 @@ class switchwrapper(Thread):
 
         self.config()
 
+    def __del__(self):
+        _msg = 'Kill myself' + __app__ +'switchwrapper'
+        self._log.error(_msg)
+
     def config(self):
 
         for key,item in self._config.items():
@@ -200,7 +208,7 @@ class switchwrapper(Thread):
           #  print('test')
             for key,item in self._processId.items():
                 self.update(key,item)
-                time.sleep(5)
+                time.sleep(15)
 
         return
 

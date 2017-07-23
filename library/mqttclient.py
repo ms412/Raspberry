@@ -56,6 +56,10 @@ class mqttclient(Thread):
         self.connect()
         self.subscribe(self._subscribe)
 
+    def __del__(self):
+        _msg = 'Kill myself' + __app__
+        self._log.error(_msg)
+
     def on_connect(self, mqttc, obj, flags, rc):
       #  print("connect rc: "+str(rc))
         if rc == 0:
