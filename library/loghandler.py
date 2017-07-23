@@ -36,10 +36,6 @@ class loghandler(object):
         self._logger = logging.getLogger(name)
         self._logger.setLevel(logging.DEBUG)
 
-    def __del__(self):
-        _msg = 'Kill myself' + __app__
-        self._log.error(_msg)
-
     def level(self,level):
         if level in 'INFO':
             self._logger.setLevel(logging.INFO)
@@ -81,15 +77,15 @@ class loghandler(object):
         self._logger.info(msg)
 
     def warning(self,msg):
-      #  print('critical',msg)
+      #  print('warning',msg)
         self._logger.warning(msg)
 
     def error(self,msg):
-       # print('critical',msg)
+       # print('error',msg)
         self._logger.error(msg)
 
     def critical(self,msg):
-#        print('critical',msg)
+       # print('critical',msg)
         self._logger.critical(msg)
 
 

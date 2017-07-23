@@ -26,9 +26,10 @@ class mqttpush(object):
         self._password = str(self._config.get('PASSWD',None))
         self._publish = str(self._config.get('PUBLISH','/PUBLISH'))
 
-    def publish(self,channel,msg):
+    def publish(self,channel,payload):
+        _channel = self._publish + '/' + channel
         self._mqttc.connect(self._host)
-        self._mqttc.publish(channel,msg)
+        self._mqttc.publish(_channel,payload)
        # print('cc',channel,msg)
         self._mqttc.loop(2)
         self._mqttc.disconnect()
